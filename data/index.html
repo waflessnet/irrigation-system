@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+    <script type = "text/javascript">
+        //https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+        /**
+         * Default values global for set status relay
+         **/
+
+        const ENABLE = 1;
+        const DISABLE = 0;
+        const TEXT_ENABLE_RELAY = "Encendido";
+        const TEXT_DISABLE_RELAY = "Apagado";
+        const RELAY_1 = 1;
+        const RELAY_2 = 2;
+
+
+        function getHostName(){
+            // return window.location.hostname;
+            return "http://" + window.location.hostname;
+        }
+        function setRelay(nRelay, state){
+
+            fetch( this.getHostName() +'/relay/set?relay='+nRelay+'&state='+state, {
+                method: 'GET',
+                mode: 'cors',
+                cache: 'no-cache'
+            })
+                .then(data => {
+                    console.log(data.text());
+                    changeTextStatus(nRelay,state);
+
+                })
+                .catch( error => {
+                    alert("Error set relay! check status ESP8266");
+                    alert(error);
+                    console.error(error);
+                });
+
+        }
+        function getStatusRelay(nRelay){
+            fetch( this.getHostName() +'/relay/get?relay='+nRelay,{
+                method: 'GET',
+                mode: 'cors',
+                cache: 'no-cache'
+            })
+                .then(res => res.clone().json())
+                .then(json =>  {
+                    console.log(json)
+                    changeTextStatus(nRelay, json.state);
+                });
+
+        }
+
+
+        function changeTextStatus(nRelay, state){
+                if(nRelay === RELAY_1){
+                    if(state === ENABLE){
+                        document.getElementById("front-yard").innerText = TEXT_ENABLE_RELAY;
+                    }
+                    if(state === DISABLE){
+                        document.getElementById("front-yard").innerText = TEXT_DISABLE_RELAY;
+                    }
+                }
+            if(nRelay === RELAY_2){
+                if(state === ENABLE) {
+                    document.getElementById("backyard").innerText = TEXT_ENABLE_RELAY;
+                }
+                if(state === DISABLE){
+                    document.getElementById("backyard").innerText = TEXT_DISABLE_RELAY;
+                }
+            }
+        }
+        window.onload = function() {
+            getStatusRelay(RELAY_1);
+            getStatusRelay(RELAY_2);
+        };
+    </script>
+    <style>
+        .center {
+            margin: auto;
+            width: 95%;
+            border: 1px solid green;
+            padding: 10px;
+        }
+        .center-not-border {
+            margin: auto;
+            width: 80%;
+            padding: 10px;
+        }
+        .button {
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+        .button2 {background-color: #008CBA;} /* Blue */
+        .button3 {background-color: #f44336;} /* Red */
+        .button4 {background-color: #e7e7e7; color: black;} /* Gray */
+        .button5 {background-color: #555555;} /* Black */
+    </style>
+    <meta charset="UTF-8">
+    <title>IRRIGATION SYSTEM</title>
+</head>
+
+
+<body>
+<div class="center-not-border">
+    <div class="center"> PATIO DELANTERO :  <span id="front-yard"> Apagado </span> </div>
+    <p class="center">
+        <button class="button"  onclick="setRelay(RELAY_1,ENABLE)">Encender</button>
+        <button class="button button3" onclick="setRelay(RELAY_1,DISABLE)"> Detener</button>
+    </p>
+
+</div>
+  <div class="center-not-border">
+      <div class="center"> PATIO TRASERO : <span id="backyard"> Apagado</span> </div>
+      <p class="center">
+          <button class="button"  onclick="setRelay(RELAY_2,ENABLE)">Encender</button>
+          <button class="button button3" onclick="setRelay(RELAY_2,DISABLE)"> Detener</button>
+      </p>
+
+  </div>
+</body>
+</html>
